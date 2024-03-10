@@ -311,7 +311,8 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
 
 void convert_SB_32(SBType &rtype)
 {
-	//According to the SB type distribution we convert the SB type instruction into machine code in binary format ,further we convert it into hexadecimal
+	//According to the SB type distribution we convert the SB type instruction into machine code in binary format ,
+    //further we convert it into hexadecimal
     int i;
     for (i = 0; i < 7; i++)
     {
@@ -608,6 +609,7 @@ void InstructionDetails_I_type2(string line, int i, IType &itype)
 
 void convert_I_32(IType &itype)
 {
+	//here conveting the all register value in binary along with imm and put in the 32 bit format (in binary order)
     int i;
     for (i = 0; i < 7; i++)
     {
@@ -691,6 +693,7 @@ void InstructionDetails_S(string line, int i, SType &rtype)
 
 void convert_S_32(SType &rtype)
 {
+	//here conveting the all register value in binary along with the imm and put in the 32 bit format (in binary order)
     int i;
     for (i = 0; i < 7; i++)
     {
@@ -724,10 +727,11 @@ void convert_S_32(SType &rtype)
 class MachineCodeHelper
 {
 public:
-    unordered_map<string, int> LabelMap_gotopc;
-    string Pro_counter_hex;
-    bitset<32> pro_counter = 0;
+    unordered_map<string, int> LabelMap_gotopc; //unorder map for storing the labels with the program counter
+    string Pro_counter_hex; //for storing the pc in hex format
+    bitset<32> pro_counter = 0; //bitset for the pc
 
+    //the following function checks for label in an instruction 
     bool checkLabel(const string &instruction)
     {
         for (char ch : instruction)
@@ -739,6 +743,7 @@ public:
         }
         return false;
     }
+    //the following function increments the program counter which is used in all the parts of code and data segments
     void incrementPro_counter(bitset<32> &pc)
     {
         for (int i = 2; i < 32; i++)
@@ -755,7 +760,7 @@ public:
         }
         return;
     }
-
+    //the following function converts the pc from bin to hex which is later printed in the mc file
     void Binary_Hex_Pro_counter()
     {
 
@@ -792,7 +797,7 @@ public:
         }
         return;
     }
-
+    //the following function is for storing the labels along with their respective program counter in the unordered map
     void storeLabel(string instruction)
     {
         int i = 0;
@@ -811,7 +816,7 @@ public:
         LabelMap_gotopc[labelname] = newLabel.pc;
         return;
     }
-
+    // the following is the function which converts the instruction to machine code hex
     string Instruction_Hex(string line)
     {
         int i = 0;
@@ -1171,9 +1176,10 @@ string preprocessLine(const std::string &line)
 // Function that processes the instructions
 void Assembler(const string &asmfileName, const string &mcfileName)
 {
-    ifstream asmFile(asmfileName);
-    ofstream mcFile(mcfileName);
+    ifstream asmFile(asmfileName); //input stream file
+    ofstream mcFile(mcfileName); //output file stream
 
+    //if we cant open the files sending the error!
     if (!asmFile.is_open() || !mcFile.is_open())
     {
         cerr << "Error: Cannot open files." << endl;
@@ -1187,6 +1193,7 @@ void Assembler(const string &asmfileName, const string &mcfileName)
 
     string line;
     bool dataflag = false;
+    //processing the lables with their program counter and storing them in the unordered_map
     while (getline(asmFile, line))
     {
 
@@ -1225,6 +1232,7 @@ void Assembler(const string &asmfileName, const string &mcfileName)
         {
             continue;
         }
+        //considering the lables only after the .text segment
         if (helper.checkLabel(processedLine) && !dataflag)
         {
             // cout<<line<<endl;
@@ -1254,6 +1262,7 @@ void Assembler(const string &asmfileName, const string &mcfileName)
 
     asmFile.open(asmfileName);
     dataflag = false;
+    //processing the instructions 
     while (getline(asmFile, line))
     {
         string processedLine = preprocessLine(line);
@@ -1314,7 +1323,7 @@ void Assembler(const string &asmfileName, const string &mcfileName)
                 continue;
             }
         }
-
+        //editing the machine code file with the instructions machine code
         helper.Binary_Hex_Pro_counter();
         // cout << helper.pro_counter.to_ulong() << "thisde" << endl;
         mcFile << helper.Pro_counter_hex << " " << helper.Instruction_Hex(processedLine) << endl;
@@ -1322,6 +1331,7 @@ void Assembler(const string &asmfileName, const string &mcfileName)
         helper.incrementPro_counter(helper.pro_counter);
     }
     // helper.incrementPro_counter(helper.pro_counter);
+    //our terminating call sign is 0x00000000
     helper.Binary_Hex_Pro_counter();
     mcFile << helper.Pro_counter_hex << " 0x00000000" << endl;
     asmFile.close();
@@ -1329,6 +1339,7 @@ void Assembler(const string &asmfileName, const string &mcfileName)
 
     asmFile.open(asmfileName);
     dataflag = false;
+    //now we are processing the data segment which start at 0x10000000
     while (getline(asmFile, line))
     {
         string processedLine = preprocessLine(line);
@@ -1342,11 +1353,13 @@ void Assembler(const string &asmfileName, const string &mcfileName)
             dataflag = false;
             continue;
         }
+        //now we are considering the .word segment with the increment in program counter +4
         if (processedLine.find(".word") != string::npos)
         {
             istringstream iss(processedLine);
             string directive, value, label;
             iss >> directive;
+            //if the line has a lable we are ignoring it and moving forward
             bool hasLabel = (processedLine.find(':') != string::npos) && (processedLine.find('.') != string::npos);
             if (hasLabel)
             {
@@ -1363,11 +1376,13 @@ void Assembler(const string &asmfileName, const string &mcfileName)
             }
             continue;
         }
+        //now we are considering the .word segment with the increment in program counter +8
         if (processedLine.find(".dword") != string::npos)
         {
             istringstream iss(processedLine);
             string directive, value, label;
             iss >> directive;
+            //if the line has a lable we are ignoring it and moving forward
             bool hasLabel = (processedLine.find(':') != string::npos) && (processedLine.find('.') != string::npos);
             if (hasLabel)
             {
@@ -1384,11 +1399,14 @@ void Assembler(const string &asmfileName, const string &mcfileName)
             }
             continue;
         }
+        //now we are considering the .word segment with the increment in program counter +1
         if (processedLine.find(".byte") != string::npos)
         {
             istringstream iss(processedLine);
             string directive, value, label;
             iss >> directive;
+            //if the line has a lable we are ignoring it and moving forward
+
             bool hasLabel = (processedLine.find(':') != string::npos) && (processedLine.find('.') != string::npos);
             if (hasLabel)
             {
@@ -1405,11 +1423,14 @@ void Assembler(const string &asmfileName, const string &mcfileName)
             }
             continue;
         }
+        //now we are considering the .word segment with the increment in program counter +2
         if (processedLine.find(".half") != string::npos)
         {
             istringstream iss(processedLine);
             string directive, value, label;
             iss >> directive;
+            //if the line has a lable we are ignoring it and moving forward
+
             bool hasLabel = (processedLine.find(':') != string::npos) && (processedLine.find('.') != string::npos);
             if (hasLabel)
             {
@@ -1427,7 +1448,7 @@ void Assembler(const string &asmfileName, const string &mcfileName)
             }
             continue;
         }
-
+        //now we are considering the .word segment with the increment in program counter +1 for each character
         if (processedLine.find(".asciiz") != string::npos)
         {
             size_t start = processedLine.find("\"");
@@ -1438,7 +1459,7 @@ void Assembler(const string &asmfileName, const string &mcfileName)
             istringstream iss(processedLine);
             string directive, label;
             iss >> directive;
-
+            //if the line has a lable we are ignoring it and moving forward
             bool hasLabel = (processedLine.find(':') != string::npos);
 
             if (hasLabel)
@@ -1479,9 +1500,9 @@ int main(int argc, char *argv[])
         cerr << "Usage: " << argv[0] << " input.asm output.mc" << endl;
         return EXIT_FAILURE;
     }
-
-    string asmfileName = argv[1];
-    string mcfileName = argv[2];
+    //getting the file names from the arguments in the bash command
+    string asmfileName = argv[1]; //asm file name
+    string mcfileName = argv[2]; //machine code output file 
 
     Assembler(asmfileName, mcfileName);
 
@@ -1490,5 +1511,4 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-// to do
-// beautify and comment the lines
+
