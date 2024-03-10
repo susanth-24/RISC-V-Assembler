@@ -100,6 +100,11 @@ void InstructionDetails_UJ(string line, int i, UJType &ujtype, unordered_map<str
         i++;
     }
     int registerval_int = stoi(registerValue);
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     ujtype.rd = registerval_int;
     // while (line[i] != ',')
     // {
@@ -119,6 +124,11 @@ void InstructionDetails_UJ(string line, int i, UJType &ujtype, unordered_map<str
     {
         int labelPc = it->second;
         ujtype.imm = (labelPc - currpc) / 2;
+    }
+    else
+    {
+        cerr << "The Label is not defined" << endl;
+        exit(EXIT_FAILURE);
     }
     return;
 }
@@ -163,6 +173,11 @@ void InstructionDetails_U(string line, int i, UType &rtype)
         i++;
     }
     int registerval_int = stoi(registerValue);
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     rtype.rd = registerval_int;
     while (!isdigit(line[i]))
     {
@@ -175,6 +190,11 @@ void InstructionDetails_U(string line, int i, UType &rtype)
         i++;
     }
     int immValueInDecimal = stoi(immValue, nullptr, 0);
+    if (immValueInDecimal < -524288 || immValueInDecimal > 524287)
+    {
+        cerr << "The imm value is not under the limit" << endl;
+        exit(EXIT_FAILURE);
+    }
     // cout << immValue << "ss" << endl;
     rtype.imm = immValueInDecimal;
 
@@ -213,6 +233,11 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
         i++;
     }
     int registerval_int = stoi(registerValue);
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     rtype.rs1 = registerval_int;
 
     while (line[i] != 'x')
@@ -227,6 +252,11 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
         i++;
     }
     registerval_int = stoi(registerValue);
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     rtype.rs2 = registerval_int;
 
     // while (line[i] != ',')
@@ -252,6 +282,11 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
     {
         int labelPc = it->second;
         rtype.imm = (labelPc - currPC) / 2;
+    }
+    else
+    {
+        cerr << "The Label is not defined" << endl;
+        exit(EXIT_FAILURE);
     }
     // cout << rtype.imm << "se" << endl;
 
@@ -338,6 +373,11 @@ void InstructionDetails_R(string line, int i, RType &rtype)
         i++;
     }
     int registerval_int = stoi(registerValue);
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     rtype.rd = registerval_int;
     while (line[i] != 'x')
     {
@@ -351,6 +391,11 @@ void InstructionDetails_R(string line, int i, RType &rtype)
         i++;
     }
     registerval_int = stoi(registerValue);
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     rtype.rs1 = registerval_int;
     while (line[i] != 'x')
     {
@@ -364,6 +409,11 @@ void InstructionDetails_R(string line, int i, RType &rtype)
         i++;
     }
     registerval_int = stoi(registerValue);
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     rtype.rs2 = registerval_int;
     return;
 }
@@ -416,6 +466,11 @@ void InstructionDetails_I_type1(string line, int i, IType &itype)
     // cout << registerValue << endl;
     int registerval_int = stoi(registerValue);
     // cout << registerval_int << "sus" << endl;
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     itype.rd = registerval_int;
     while (line[i] != 'x')
     {
@@ -431,6 +486,11 @@ void InstructionDetails_I_type1(string line, int i, IType &itype)
     // cout << registerValue << endl;
 
     registerval_int = stoi(registerValue);
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     itype.rs1 = registerval_int;
     while (!isdigit(line[i]) && line[i] != '-')
     {
@@ -474,6 +534,11 @@ void InstructionDetails_I_type2(string line, int i, IType &itype)
         i++;
     }
     int registerval_int = stoi(registerValue);
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     // cout<<registerval_int<<"sus"<<endl;
     itype.rd = registerval_int;
 
@@ -510,6 +575,11 @@ void InstructionDetails_I_type2(string line, int i, IType &itype)
     }
     registerval_int = stoi(registerValue);
     // cout<<registerval_int<<"sus"<<endl;
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     itype.rs1 = registerval_int;
     return;
 }
@@ -556,6 +626,11 @@ void InstructionDetails_S(string line, int i, SType &rtype)
     }
     // cout << registerValue << endl;
     int registerval_int = stoi(registerValue);
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     rtype.rs2 = registerval_int;
     while (!isdigit(line[i]))
     {
@@ -583,6 +658,11 @@ void InstructionDetails_S(string line, int i, SType &rtype)
     }
     // cout << registerValue << endl;
     registerval_int = stoi(registerValue);
+    if (registerval_int < 0 || registerval_int > 31)
+    {
+        cerr << "The register does not exist" << endl;
+        exit(EXIT_FAILURE);
+    }
     rtype.rs1 = registerval_int;
     return;
 }
@@ -992,61 +1072,61 @@ public:
         }
         else if (real_instruct == "bne")
         {
-            SBType beq;
-            beq.func3 = 1;
-            beq.opcode = 99;
-            InstructionDetails_SB(line, i, beq, LabelMap_gotopc, this->pro_counter.to_ulong());
-            convert_SB_32(beq);
-            beq.InstructionHex = bin_hex_conversion(beq.Instruction32);
-            return beq.InstructionHex;
+            SBType bne;
+            bne.func3 = 1;
+            bne.opcode = 99;
+            InstructionDetails_SB(line, i, bne, LabelMap_gotopc, this->pro_counter.to_ulong());
+            convert_SB_32(bne);
+            bne.InstructionHex = bin_hex_conversion(bne.Instruction32);
+            return bne.InstructionHex;
         }
         else if (real_instruct == "bge")
         {
-            SBType beq;
-            beq.func3 = 5;
-            beq.opcode = 99;
-            InstructionDetails_SB(line, i, beq, LabelMap_gotopc, this->pro_counter.to_ulong());
-            convert_SB_32(beq);
-            beq.InstructionHex = bin_hex_conversion(beq.Instruction32);
-            return beq.InstructionHex;
+            SBType bge;
+            bge.func3 = 5;
+            bge.opcode = 99;
+            InstructionDetails_SB(line, i, bge, LabelMap_gotopc, this->pro_counter.to_ulong());
+            convert_SB_32(bge);
+            bge.InstructionHex = bin_hex_conversion(bge.Instruction32);
+            return bge.InstructionHex;
         }
         else if (real_instruct == "blt")
         {
-            SBType beq;
-            beq.func3 = 4;
-            beq.opcode = 99;
-            InstructionDetails_SB(line, i, beq, LabelMap_gotopc, this->pro_counter.to_ulong());
-            convert_SB_32(beq);
-            beq.InstructionHex = bin_hex_conversion(beq.Instruction32);
-            return beq.InstructionHex;
+            SBType blt;
+            blt.func3 = 4;
+            blt.opcode = 99;
+            InstructionDetails_SB(line, i, blt, LabelMap_gotopc, this->pro_counter.to_ulong());
+            convert_SB_32(blt);
+            blt.InstructionHex = bin_hex_conversion(blt.Instruction32);
+            return blt.InstructionHex;
         }
         else if (real_instruct == "auipc")
         {
-            UType beq;
-            beq.opcode = 23;
-            InstructionDetails_U(line, i, beq);
-            convert_U_32(beq);
-            beq.InstructionHex = bin_hex_conversion(beq.Instruction32);
-            return beq.InstructionHex;
+            UType auipc;
+            auipc.opcode = 23;
+            InstructionDetails_U(line, i, auipc);
+            convert_U_32(auipc);
+            auipc.InstructionHex = bin_hex_conversion(auipc.Instruction32);
+            return auipc.InstructionHex;
         }
         else if (real_instruct == "lui")
         {
-            UType beq;
-            beq.opcode = 55;
-            InstructionDetails_U(line, i, beq);
-            convert_U_32(beq);
-            beq.InstructionHex = bin_hex_conversion(beq.Instruction32);
-            return beq.InstructionHex;
+            UType lui;
+            lui.opcode = 55;
+            InstructionDetails_U(line, i, lui);
+            convert_U_32(lui);
+            lui.InstructionHex = bin_hex_conversion(lui.Instruction32);
+            return lui.InstructionHex;
         }
 
         else if (real_instruct == "jal")
         {
-            UJType beq;
-            beq.opcode = 111;
-            InstructionDetails_UJ(line, i, beq, LabelMap_gotopc, this->pro_counter.to_ulong());
-            convert_UJ_32(beq);
-            beq.InstructionHex = bin_hex_conversion(beq.Instruction32);
-            return beq.InstructionHex;
+            UJType jal;
+            jal.opcode = 111;
+            InstructionDetails_UJ(line, i, jal, LabelMap_gotopc, this->pro_counter.to_ulong());
+            convert_UJ_32(jal);
+            jal.InstructionHex = bin_hex_conversion(jal.Instruction32);
+            return jal.InstructionHex;
         }
         else
             return "error";
