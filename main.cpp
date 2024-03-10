@@ -175,7 +175,7 @@ void InstructionDetails_U(string line, int i, UType &rtype)
         i++;
     }
     int immValueInDecimal = stoi(immValue, nullptr, 0);
-    //cout << immValue << "ss" << endl;
+    // cout << immValue << "ss" << endl;
     rtype.imm = immValueInDecimal;
 
     return;
@@ -257,7 +257,6 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
 
     return;
 }
-
 
 void convert_SB_32(SBType &rtype)
 {
@@ -1085,15 +1084,20 @@ void Assembler(const string &asmfileName, const string &mcfileName)
     uint32_t dataAddress = 0x10000000;
 
     string line;
+    bool dataflag = false;
     while (getline(asmFile, line))
     {
+
         string processedLine = preprocessLine(line);
+        // cout<<processedLine<<endl;
         if (processedLine.find(".data") != string::npos)
         {
+            dataflag = true;
             continue;
         }
         if (processedLine.find(".text") != string::npos)
         {
+            dataflag = false;
             continue;
         }
         else if (line.find(".word") != string::npos)
@@ -1119,8 +1123,9 @@ void Assembler(const string &asmfileName, const string &mcfileName)
         {
             continue;
         }
-        if (helper.checkLabel(processedLine))
+        if (helper.checkLabel(processedLine) && !dataflag)
         {
+            // cout<<line<<endl;
             helper.storeLabel(line);
             size_t labelEnd = processedLine.find(':');
             string lineWithoutSpaces_1 = processedLine;
@@ -1146,16 +1151,19 @@ void Assembler(const string &asmfileName, const string &mcfileName)
     helper.pro_counter = 0;
 
     asmFile.open(asmfileName);
+    dataflag = false;
     while (getline(asmFile, line))
     {
         string processedLine = preprocessLine(line);
-        //cout << processedLine << endl;
+        // cout << processedLine << endl;
         if (processedLine.find(".data") != string::npos)
         {
+            dataflag = true;
             continue;
         }
         if (processedLine.find(".text") != string::npos)
         {
+            dataflag = false;
             continue;
         }
         else if (line.find(".word") != string::npos)
@@ -1181,7 +1189,12 @@ void Assembler(const string &asmfileName, const string &mcfileName)
         {
             continue;
         }
-        if (helper.checkLabel(processedLine))
+        if (helper.checkLabel(processedLine) && dataflag)
+        {
+            cout << line << endl;
+            continue;
+        }
+        if (helper.checkLabel(processedLine) && !dataflag)
         {
 
             size_t labelEnd = processedLine.find(':');
@@ -1213,14 +1226,30 @@ void Assembler(const string &asmfileName, const string &mcfileName)
     helper.pro_counter = dataAddress;
 
     asmFile.open(asmfileName);
+    dataflag = false;
     while (getline(asmFile, line))
     {
         string processedLine = preprocessLine(line);
+        if (processedLine.find(".data") != string::npos)
+        {
+            dataflag = true;
+            continue;
+        }
+        if (processedLine.find(".text") != string::npos)
+        {
+            dataflag = false;
+            continue;
+        }
         if (processedLine.find(".word") != string::npos)
         {
             istringstream iss(processedLine);
-            string directive, value;
+            string directive, value, label;
             iss >> directive;
+            bool hasLabel = (processedLine.find(':') != string::npos) && (processedLine.find('.') != string::npos);
+            if (hasLabel)
+            {
+                iss >> label;
+            }
             while (iss >> value)
             {
                 uint32_t data = stoi(value, nullptr, 0);
@@ -1235,8 +1264,13 @@ void Assembler(const string &asmfileName, const string &mcfileName)
         if (processedLine.find(".dword") != string::npos)
         {
             istringstream iss(processedLine);
-            string directive, value;
+            string directive, value, label;
             iss >> directive;
+            bool hasLabel = (processedLine.find(':') != string::npos) && (processedLine.find('.') != string::npos);
+            if (hasLabel)
+            {
+                iss >> label;
+            }
             while (iss >> value)
             {
                 uint32_t data = stoi(value, nullptr, 0);
@@ -1251,8 +1285,13 @@ void Assembler(const string &asmfileName, const string &mcfileName)
         if (processedLine.find(".byte") != string::npos)
         {
             istringstream iss(processedLine);
-            string directive, value;
+            string directive, value, label;
             iss >> directive;
+            bool hasLabel = (processedLine.find(':') != string::npos) && (processedLine.find('.') != string::npos);
+            if (hasLabel)
+            {
+                iss >> label;
+            }
             while (iss >> value)
             {
                 uint32_t data = stoi(value, nullptr, 0);
@@ -1267,8 +1306,13 @@ void Assembler(const string &asmfileName, const string &mcfileName)
         if (processedLine.find(".half") != string::npos)
         {
             istringstream iss(processedLine);
-            string directive, value;
+            string directive, value, label;
             iss >> directive;
+            bool hasLabel = (processedLine.find(':') != string::npos) && (processedLine.find('.') != string::npos);
+            if (hasLabel)
+            {
+                iss >> label;
+            }
             while (iss >> value)
             {
                 // cout<<value<<endl;
@@ -1287,31 +1331,37 @@ void Assembler(const string &asmfileName, const string &mcfileName)
             size_t start = processedLine.find("\"");
             size_t end = processedLine.rfind("\"");
 
-            string dataStrings = processedLine.substr(start + 1, end - start - 1);
+            string dataString = processedLine.substr(start + 1, end - start - 1);
 
-            istringstream iss(dataStrings);
-            string dataString;
-            while (getline(iss, dataString, '"'))
+            istringstream iss(processedLine);
+            string directive, label;
+            iss >> directive;
+
+            bool hasLabel = (processedLine.find(':') != string::npos);
+
+            if (hasLabel)
             {
-                if (!dataString.empty())
-                {
-                    for (char c : dataString)
-                    {
-                        helper.Binary_Hex_Pro_counter();
-                        uint8_t data = static_cast<uint8_t>(c);
-                        mcFile << hex << setw(8) << setfill('0') << helper.Pro_counter_hex << " 0x" << hex << setw(2) << setfill('0') << static_cast<int>(data) << endl;
-                        uint32_t counter_value = helper.pro_counter.to_ulong();
-                        counter_value += 1;
-                        helper.pro_counter = counter_value;
-                    }
-
-                    helper.Binary_Hex_Pro_counter();
-                    mcFile << hex << setw(8) << setfill('0') << helper.Pro_counter_hex << " 0x00" << endl;
-                    uint32_t counter_value = helper.pro_counter.to_ulong();
-                    counter_value += 1;
-                    helper.pro_counter = counter_value;
-                }
+                iss >> label;
             }
+
+            for (char c : dataString)
+            {
+                helper.Binary_Hex_Pro_counter();
+                uint8_t data = static_cast<uint8_t>(c);
+                mcFile << hex << setw(8) << setfill('0') << helper.Pro_counter_hex << " 0x" << hex << setw(2) << setfill('0') << static_cast<int>(data) << endl;
+                uint32_t counter_value = helper.pro_counter.to_ulong();
+                counter_value += 1;
+                helper.pro_counter = counter_value;
+            }
+
+            // Add null terminator
+            helper.Binary_Hex_Pro_counter();
+            mcFile << hex << setw(8) << setfill('0') << helper.Pro_counter_hex << " 0x00" << endl;
+            uint32_t counter_value = helper.pro_counter.to_ulong();
+            counter_value += 1;
+            helper.pro_counter = counter_value;
+
+            continue;
         }
     }
 
