@@ -25,6 +25,7 @@ struct Label
 
 struct RType
 {
+	//Basically here we defined the bit distribution of 32 bit ,for R-type instruction 
     bitset<32> Instruction32;
     string InstructionHex;
     bitset<7> opcode;
@@ -37,6 +38,7 @@ struct RType
 
 struct IType
 {
+	//Here also making the bit distribution
     bitset<32> Instruction32;
     string InstructionHex;
     bitset<7> opcode;
@@ -48,6 +50,7 @@ struct IType
 
 struct SType
 {
+	//Bit distribution for S type instruction
     bitset<32> Instruction32;
     string InstructionHex;
     bitset<7> opcode;
@@ -59,6 +62,7 @@ struct SType
 
 struct SBType
 {
+	//Bit distrubution for SB type instruction
     bitset<32> Instruction32;
     string InstructionHex;
     bitset<7> opcode;
@@ -70,6 +74,7 @@ struct SBType
 
 struct UType
 {
+	//Bit Distribution for U type instruction
     bitset<32> Instruction32;
     string InstructionHex;
     bitset<7> opcode;
@@ -88,6 +93,7 @@ struct UJType
 
 void InstructionDetails_UJ(string line, int i, UJType &ujtype, unordered_map<string, int> labelMap, int currpc)
 {
+	//first search the x in the string line
     while (line[i] != 'x')
     {
         i++;
@@ -99,18 +105,19 @@ void InstructionDetails_UJ(string line, int i, UJType &ujtype, unordered_map<str
         registerValue += line[i];
         i++;
     }
-    int registerval_int = stoi(registerValue);
+    int registerval_int = stoi(registerValue);//here convert the string to integer of the register value
     if (registerval_int < 0 || registerval_int > 31)
     {
+		//Basically here we set the corner cases for register value it should not more than 31 and should not less than 0
         cerr << "The register does not exist" << endl;
         exit(EXIT_FAILURE);
     }
-    ujtype.rd = registerval_int;
-    // while (line[i] != ',')
-    // {
-    //     i++;
-    // }
-    // i++;
+    ujtype.rd = registerval_int;//finally we got the distination register integer value
+    while (line[i] != ',' &&line[i]!=' ' )
+    {
+        i++;
+    }
+    i++;
     while (line[i] == ' ')
         i++;
     string Label = "";
@@ -119,14 +126,15 @@ void InstructionDetails_UJ(string line, int i, UJType &ujtype, unordered_map<str
         Label += line[i];
         i++;
     }
-    auto it = labelMap.find(Label);
+    auto it = labelMap.find(Label);//here searching the level is defined or not
     if (it != labelMap.end())
     {
         int labelPc = it->second;
-        ujtype.imm = (labelPc - currpc) / 2;
+        ujtype.imm = (labelPc - currpc) / 2;//if level defined the find the imm. value according program counter value
     }
     else
     {
+		//if level not defined the error in the input code
         cerr << "The Label is not defined" << endl;
         exit(EXIT_FAILURE);
     }
@@ -135,6 +143,7 @@ void InstructionDetails_UJ(string line, int i, UJType &ujtype, unordered_map<str
 
 void convert_UJ_32(UJType &ujtype)
 {
+	//In this function basically we convert UJ type instruction code in machine code 
     int i;
     for (i = 0; i < 7; i++)
     {
@@ -161,6 +170,9 @@ void convert_UJ_32(UJType &ujtype)
 
 void InstructionDetails_U(string line, int i, UType &rtype)
 {
+	//In this function we extract the detail of U type instruction
+	//first we extract the destination register value
+	//the extracting the immidiate value in decimal format
     while (line[i] != 'x')
     {
         i++;
@@ -203,6 +215,7 @@ void InstructionDetails_U(string line, int i, UType &rtype)
 
 void convert_U_32(UType &rtype)
 {
+	//Here simply coverting the U type instruction distribution into the machine code.
     int i;
     for (i = 0; i < 7; i++)
     {
@@ -221,6 +234,8 @@ void convert_U_32(UType &rtype)
 
 void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<string, int> labelMap, int currPC)
 {
+	//In this function we extract the details for SB type instruction
+	//accoding the insturion distribution firstly find the register rs1 and rs2 the check the level defined or not , if level defined then get the imm. field according to pc value
     while (line[i] != 'x')
     {
         i++;
@@ -238,7 +253,7 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
         cerr << "The register does not exist" << endl;
         exit(EXIT_FAILURE);
     }
-    rtype.rs1 = registerval_int;
+    rtype.rs1 = registerval_int;  //firstly got the rs1 value
 
     while (line[i] != 'x')
     {
@@ -257,13 +272,13 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
         cerr << "The register does not exist" << endl;
         exit(EXIT_FAILURE);
     }
-    rtype.rs2 = registerval_int;
-
-    // while (line[i] != ',')
-    // {
-    //     i++;
-    // }
-    // i++;
+    rtype.rs2 = registerval_int;   //got the rs2 value
+    
+    while (line[i] != ',' &&line[i]!=' ' )
+    {
+        i++;
+    }
+    i++;
 
     while (i < line.size() && (line[i] == ' ' || line[i] == '\t'))
     {
@@ -271,6 +286,7 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
     }
 
     string Label = "";
+	//checking the level is defined or not
     while (i < line.size() && line[i] != ' ' && line[i] != '#' && line[i] != '\t' && line[i] != ',')
     {
         Label += line[i];
@@ -295,6 +311,7 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
 
 void convert_SB_32(SBType &rtype)
 {
+	//According to the SB type distribution we convert the SB type instruction into machine code in binary format ,further we convert it into hexadecimal
     int i;
     for (i = 0; i < 7; i++)
     {
@@ -336,6 +353,7 @@ void convert_SB_32(SBType &rtype)
 
 string bin_hex_conversion(bitset<32> bin)
 {
+	//This funciotn take the 32 bit binary and convert it into hexadecimal and return it in for of string
     string hex_fin = "0x";
     for (int i = 31; i >= 0;)
     {
@@ -361,6 +379,9 @@ string bin_hex_conversion(bitset<32> bin)
 
 void InstructionDetails_R(string line, int i, RType &rtype)
 {
+	//Here extraction the detail of R type instruction
+	//firstly find the rd value the going to find the rs1 and rs2 and further going to convert it into machine code
+
     while (line[i] != 'x')
     {
         i++;
@@ -420,6 +441,7 @@ void InstructionDetails_R(string line, int i, RType &rtype)
 
 void convert_R_32(RType &rtype)
 {
+	//here conveting the all register value in binary and put in the 32 bit format (in binary order)
     int i;
     for (i = 0; i < 7; i++)
     {
