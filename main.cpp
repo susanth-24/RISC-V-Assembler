@@ -101,11 +101,11 @@ void InstructionDetails_UJ(string line, int i, UJType &ujtype, unordered_map<str
     }
     int registerval_int = stoi(registerValue);
     ujtype.rd = registerval_int;
-    while (line[i] != ',')
-    {
-        i++;
-    }
-    i++;
+    // while (line[i] != ',')
+    // {
+    //     i++;
+    // }
+    // i++;
     while (line[i] == ' ')
         i++;
     string Label = "";
@@ -174,8 +174,10 @@ void InstructionDetails_U(string line, int i, UType &rtype)
         immValue += line[i];
         i++;
     }
-    int immValueInDecimal = stoi(immValue);
+    int immValueInDecimal = stoi(immValue, nullptr, 0);
+    //cout << immValue << "ss" << endl;
     rtype.imm = immValueInDecimal;
+
     return;
 }
 
@@ -197,8 +199,6 @@ void convert_U_32(UType &rtype)
     return;
 }
 
-
-
 void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<string, int> labelMap, int currPC)
 {
     while (line[i] != 'x')
@@ -207,7 +207,7 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
     }
     i++;
     string registerValue = "";
-    while (line[i] != ' ' and line[i] != ',')
+    while (line[i] != ' ' && line[i] != ',')
     {
         registerValue += line[i];
         i++;
@@ -221,7 +221,7 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
     }
     i++;
     registerValue = "";
-    while (line[i] != ' ' and line[i] != ',')
+    while (line[i] != ' ' && line[i] != ',')
     {
         registerValue += line[i];
         i++;
@@ -229,11 +229,11 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
     registerval_int = stoi(registerValue);
     rtype.rs2 = registerval_int;
 
-    while (line[i] != ',')
-    {
-        i++;
-    }
-    i++;
+    // while (line[i] != ',')
+    // {
+    //     i++;
+    // }
+    // i++;
 
     while (i < line.size() && (line[i] == ' ' || line[i] == '\t'))
     {
@@ -241,11 +241,12 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
     }
 
     string Label = "";
-    while (i < line.size() && line[i] != ' ' && line[i] != '#' && line[i] != '\t')
+    while (i < line.size() && line[i] != ' ' && line[i] != '#' && line[i] != '\t' && line[i] != ',')
     {
         Label += line[i];
         i++;
     }
+    // cout<<Label<<"deba"<<endl;
     auto it = labelMap.find(Label);
     if (it != labelMap.end())
     {
@@ -256,6 +257,7 @@ void InstructionDetails_SB(string line, int i, SBType &rtype, unordered_map<stri
 
     return;
 }
+
 
 void convert_SB_32(SBType &rtype)
 {
@@ -414,6 +416,7 @@ void InstructionDetails_I_type1(string line, int i, IType &itype)
     }
     // cout << registerValue << endl;
     int registerval_int = stoi(registerValue);
+    // cout << registerval_int << "sus" << endl;
     itype.rd = registerval_int;
     while (line[i] != 'x')
     {
@@ -453,7 +456,7 @@ void InstructionDetails_I_type1(string line, int i, IType &itype)
         cerr << "Error: Immediate value out of range for a 12-bit signed integer." << endl;
         exit(EXIT_FAILURE);
     }
-    // cout<<immValueInDecimal<<"sus"<<endl;
+    // cout << immValueInDecimal << "sus" << endl;
     itype.imm = immValueInDecimal;
 
     return;
@@ -931,7 +934,7 @@ public:
             IType jalr;
             jalr.func3 = 0;
             jalr.opcode = 103;
-            InstructionDetails_I_type2(line, i, jalr);
+            InstructionDetails_I_type1(line, i, jalr);
             convert_I_32(jalr);
             jalr.InstructionHex = bin_hex_conversion(jalr.Instruction32);
             return jalr.InstructionHex;
@@ -979,6 +982,7 @@ public:
         }
         else if (real_instruct == "beq")
         {
+            // cout << "beq here" << endl;
             SBType beq;
             beq.func3 = 0;
             beq.opcode = 99;
@@ -1118,6 +1122,20 @@ void Assembler(const string &asmfileName, const string &mcfileName)
         if (helper.checkLabel(processedLine))
         {
             helper.storeLabel(line);
+            size_t labelEnd = processedLine.find(':');
+            string lineWithoutSpaces_1 = processedLine;
+            lineWithoutSpaces_1.erase(remove_if(lineWithoutSpaces_1.begin(), lineWithoutSpaces_1.end(), ::isspace), lineWithoutSpaces_1.end());
+
+            if (labelEnd != string::npos && labelEnd + 1 < lineWithoutSpaces_1.size())
+            {
+                processedLine = processedLine.substr(labelEnd + 1);
+                processedLine = processedLine.substr(processedLine.find_first_not_of(" \t"));
+            }
+            else
+            {
+                // it is a pure label
+                continue;
+            }
         }
 
         helper.Binary_Hex_Pro_counter();
@@ -1131,7 +1149,7 @@ void Assembler(const string &asmfileName, const string &mcfileName)
     while (getline(asmFile, line))
     {
         string processedLine = preprocessLine(line);
-        // cout << processedLine << endl;
+        //cout << processedLine << endl;
         if (processedLine.find(".data") != string::npos)
         {
             continue;
@@ -1253,7 +1271,7 @@ void Assembler(const string &asmfileName, const string &mcfileName)
             iss >> directive;
             while (iss >> value)
             {
-                //cout<<value<<endl;
+                // cout<<value<<endl;
                 helper.Binary_Hex_Pro_counter();
                 uint16_t data = stoi(value, nullptr, 0);
                 mcFile << hex << setw(8) << setfill('0') << helper.Pro_counter_hex << " 0x" << hex << setw(4) << setfill('0') << data << endl;
@@ -1264,7 +1282,6 @@ void Assembler(const string &asmfileName, const string &mcfileName)
             continue;
         }
 
-        
         if (processedLine.find(".asciiz") != string::npos)
         {
             size_t start = processedLine.find("\"");
@@ -1297,7 +1314,7 @@ void Assembler(const string &asmfileName, const string &mcfileName)
             }
         }
     }
-    
+
     asmFile.close();
     mcFile.close();
 }
