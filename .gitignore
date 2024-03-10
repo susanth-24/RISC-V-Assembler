@@ -1,0 +1,19 @@
+# Ignore compiled files
+*.exe
+*.out
+*.o
+
+# Ignore build and output directories
+/build/
+/out/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore user-specific files
+.vscode/
+.idea/
+
+# Ignore log files
+*.log
